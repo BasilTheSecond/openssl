@@ -303,6 +303,15 @@ The encrypted text always starts with the same pattern U2FsdGVkX1 and ends with 
 
 Why is this?
 
+Check this out:
+http://crypto.stackexchange.com/questions/15110/cryptojs-aes-result-always-has-same-first-few-bytes
+
+This same text is when base64 decoded:
+
+Salted__
+
+This is a prefix added to the cypertext to define its format.
+
 
 To get the same output we can use the same salt option -S or -nosalt:
 
