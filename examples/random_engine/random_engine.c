@@ -1,6 +1,8 @@
 #include <openssl/engine.h>
 #include <string.h>
 
+// RAND_bytes() is generated entirely by the RDRAND 
+// instruction on Intel h/w
 int main(int arc, char *argv[])
 { 
 	ENGINE *engine;
@@ -40,15 +42,24 @@ int main(int arc, char *argv[])
 	
 	memset(buffer, 0, sizeof(buffer));
 	
+	#if 0
 	for (int i = 0; i < sizeof(buffer); i++) {
 		if ((i % 16) == 0) {
 			printf("\n");
 		}
 		printf("%02x ", buffer[i]);
 	}
+	#endif
+	
+	printf("\n");
 
 	rc = RAND_bytes(buffer, sizeof(buffer));
 	
+	if (rc == 1)
+		printf("strong randomness");
+	else if (rc == 0)
+		printf("weak randomness");
+
 
 	if(rc != 1) {
 		  unsigned long err = ERR_get_error();

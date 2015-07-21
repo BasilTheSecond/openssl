@@ -21,16 +21,25 @@ int main(int arc, char *argv[])
 	
 	memset(buffer, 0, sizeof(buffer));
 	
+	#if 0
 	for (int i = 0; i < sizeof(buffer); i++) {
 		if ((i % 16) == 0) {
 			printf("\n");
 		}
 		printf("%02x ", buffer[i]);
 	}
+	#endif
+	
+	printf("\n");
 
 	/* RAND_bytes() automatically calls RAND_poll()
 	 */
 	int rc = RAND_bytes(buffer, sizeof(buffer));
+	
+	if (rc == 1)
+		printf("strong randomness");
+	else if (rc == 0)
+		printf("weak randomness");
 	
 
 	if(rc != 1) {

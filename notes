@@ -178,6 +178,7 @@ http://wiki.openssl.org/index.php/Libcrypto_API
 http://wiki.openssl.org/index.php/Category:Examples
 http://www.ajanicij.info/content/openssl-sample-code-using-bio
 https://software.intel.com/en-us/articles/how-to-use-the-rdrand-engine-in-openssl-for-random-number-generation
+http://jbp.io/2014/01/16/openssl-rand-api/
 
 6) How to build an example
 
@@ -209,6 +210,27 @@ test: all
 	@echo Test running random_engine
 	./random_bytes
 	
+7) How to probe Intel CPU for rdrand instruction:
 
+$ cat /proc/cpuinfo | grep -i rdrand
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+
+8) FIPS requirements
+
+US export rules require that cryptographic modules confirm to the document:
+
+http://csrc.nist.gov/publications/fips/fips140-2/fips1402.pdf
+
+- FIPS mode is a special mode of operation which specifies the library should operate according to the security policies and procedures.
+The mode requires use of the FIPS Capable OpenSSL library, and must be enabled with a call to FIPS_mode_set. 
+Once in FIPS mode, a default DRBG is used as specified in SP800-90. 
+
+Check these links:
+
+http://wiki.openssl.org/index.php/Random_Numbers
+https://wiki.openssl.org/index.php/Compilation_and_Installation#FIPS_Capable_Library
 
 
