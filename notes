@@ -1,0 +1,151 @@
+1) For openssl repository from the following github location:
+
+https://github.com/openssl/openssl
+
+I forked into GitHub from this location
+
+2) How to build openssl
+
+LINKS:
+http://wiki.openssl.org/index.php/Compilation_and_Installation
+
+- The version installed on ubuntu 12.04 is:
+
+$ openssl version -a
+OpenSSL 1.0.1 14 Mar 2012
+built on: Thu Jun 11 15:26:20 UTC 2015
+platform: debian-amd64
+options:  bn(64,64) rc4(16x,int) des(idx,cisc,16,int) blowfish(idx) 
+compiler: cc -fPIC -DOPENSSL_PIC -DZLIB -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -m64 -DL_ENDIAN -DTERMIO -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro -Wa,--noexecstack -Wall -DOPENSSL_NO_TLS1_2_CLIENT -DMD32_REG_T=int -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM
+OPENSSLDIR: "/usr/lib/ssl"
+
+I created a branch do_ubuntu_12_04 from OpenSSL_1_0_1 tag which is the version of the openssl in Ubuntu 12.04
+
+- Build process
+
+$ ./config 
+
+
+3) Package that installs openssl headers is libssl-dev
+
+- libssl-dev
+SSL development libraries, header files and documentation
+
+- installed files
+/.
+/usr
+/usr/include
+/usr/include/openssl
+/usr/include/openssl/aes.h
+/usr/include/openssl/asn1.h
+/usr/include/openssl/asn1_mac.h
+/usr/include/openssl/asn1t.h
+/usr/include/openssl/bio.h
+/usr/include/openssl/blowfish.h
+/usr/include/openssl/bn.h
+/usr/include/openssl/buffer.h
+/usr/include/openssl/camellia.h
+/usr/include/openssl/cast.h
+/usr/include/openssl/cmac.h
+/usr/include/openssl/cms.h
+/usr/include/openssl/comp.h
+/usr/include/openssl/conf.h
+/usr/include/openssl/conf_api.h
+/usr/include/openssl/crypto.h
+/usr/include/openssl/des.h
+/usr/include/openssl/des_old.h
+/usr/include/openssl/dh.h
+/usr/include/openssl/dsa.h
+/usr/include/openssl/dso.h
+/usr/include/openssl/dtls1.h
+/usr/include/openssl/e_os2.h
+/usr/include/openssl/ebcdic.h
+/usr/include/openssl/ec.h
+/usr/include/openssl/ecdh.h
+/usr/include/openssl/ecdsa.h
+/usr/include/openssl/engine.h
+/usr/include/openssl/err.h
+/usr/include/openssl/evp.h
+/usr/include/openssl/hmac.h
+/usr/include/openssl/krb5_asn.h
+/usr/include/openssl/kssl.h
+/usr/include/openssl/lhash.h
+/usr/include/openssl/md4.h
+/usr/include/openssl/md5.h
+/usr/include/openssl/modes.h
+/usr/include/openssl/obj_mac.h
+/usr/include/openssl/objects.h
+/usr/include/openssl/ocsp.h
+/usr/include/openssl/opensslconf.h
+/usr/include/openssl/opensslv.h
+/usr/include/openssl/ossl_typ.h
+/usr/include/openssl/pem.h
+/usr/include/openssl/pem2.h
+/usr/include/openssl/pkcs12.h
+/usr/include/openssl/pkcs7.h
+/usr/include/openssl/pqueue.h
+/usr/include/openssl/rand.h
+/usr/include/openssl/rc2.h
+/usr/include/openssl/rc4.h
+/usr/include/openssl/ripemd.h
+/usr/include/openssl/rsa.h
+/usr/include/openssl/safestack.h
+/usr/include/openssl/seed.h
+/usr/include/openssl/sha.h
+/usr/include/openssl/srp.h
+/usr/include/openssl/srtp.h
+/usr/include/openssl/ssl.h
+/usr/include/openssl/ssl2.h
+/usr/include/openssl/ssl23.h
+/usr/include/openssl/ssl3.h
+/usr/include/openssl/stack.h
+/usr/include/openssl/symhacks.h
+/usr/include/openssl/tls1.h
+/usr/include/openssl/ts.h
+/usr/include/openssl/txt_db.h
+/usr/include/openssl/ui.h
+/usr/include/openssl/ui_compat.h
+/usr/include/openssl/whrlpool.h
+/usr/include/openssl/x509.h
+/usr/include/openssl/x509_vfy.h
+/usr/include/openssl/x509v3.h
+/usr/lib
+/usr/lib/x86_64-linux-gnu
+/usr/lib/x86_64-linux-gnu/libcrypto.a
+/usr/lib/x86_64-linux-gnu/libcrypto.so
+/usr/lib/x86_64-linux-gnu/libssl.a
+/usr/lib/x86_64-linux-gnu/libssl.so
+/usr/lib/x86_64-linux-gnu/pkgconfig
+/usr/lib/x86_64-linux-gnu/pkgconfig/libcrypto.pc
+/usr/lib/x86_64-linux-gnu/pkgconfig/libssl.pc
+/usr/lib/x86_64-linux-gnu/pkgconfig/openssl.pc
+/usr/share
+/usr/share/doc
+/usr/share/doc/libssl-dev
+/usr/share/doc/libssl-dev/changelog.Debian.gz
+/usr/share/doc/libssl-dev/changelog.gz
+/usr/share/doc/libssl-dev/copyright
+
+4) Documentation:
+
+LINKS:
+https://www.openssl.org/docs/
+http://wiki.openssl.org/index.php/Main_Page
+
+- openssl is a command line tool
+man openssl
+
+LINKS:
+https://www.openssl.org/docs/apps/openssl.html
+
+- crypto library and symetric cyphers
+
+LINKS:
+https://www.openssl.org/docs/apps/enc.html
+https://www.openssl.org/docs/crypto/crypto.html
+https://www.openssl.org/docs/crypto/
+
+man enc
+
+
+
