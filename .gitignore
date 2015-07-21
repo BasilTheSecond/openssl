@@ -4,3 +4,7 @@
 /libssl.pc
 /openssl.pc
 /rehash.time
+/libcrypto.so
+/libcrypto.so.1.0.0
+/libssl.so
+/libssl.so.1.0.0

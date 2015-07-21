@@ -30,10 +30,22 @@ $ make test
 
 NOTE: To to delete a configuration and start anew, run make dclean. 
 
+$ make clean
+$ make dclean
+$ ./config
+$ make
+$ make test
+
+NOTE: To configure building shared libraries:
+
+./config shared
+
 3) Package that installs openssl headers is libssl-dev
 
 - libssl-dev
 SSL development libraries, header files and documentation
+
+apt-get install libss-dev
 
 - installed files
 /.
@@ -150,6 +162,15 @@ https://www.openssl.org/docs/crypto/crypto.html
 https://www.openssl.org/docs/crypto/
 
 man enc
+
+5) Some examples:
+
+LINKS:
+http://wiki.openssl.org/index.php/Diffie-Hellman_parameters
+http://wiki.openssl.org/index.php/Libcrypto_API
+http://wiki.openssl.org/index.php/Category:Examples
+
+6) How to build an example
 
 
 
