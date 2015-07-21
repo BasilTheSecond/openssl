@@ -25,6 +25,7 @@ I created a branch do_ubuntu_12_04 from OpenSSL_1_0_1 tag which is the version o
 
 $ ./config 
 
+NOTE: To to delete a configuration and start anew, run make dclean. 
 
 3) Package that installs openssl headers is libssl-dev
 
