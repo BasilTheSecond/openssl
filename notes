@@ -8,6 +8,7 @@ I forked into GitHub from this location
 
 LINKS:
 http://wiki.openssl.org/index.php/Compilation_and_Installation
+http://wiki.openssl.org/index.php/Android
 
 - The version installed on ubuntu 12.04 is:
 
@@ -24,6 +25,8 @@ I created a branch do_ubuntu_12_04 from OpenSSL_1_0_1 tag which is the version o
 - Build process
 
 $ ./config 
+$ make
+$ make test
 
 NOTE: To to delete a configuration and start anew, run make dclean. 
 
