@@ -1,0 +1,17 @@
+/e_gost_err.o
+/gost2001.o
+/gost2001_keyx.o
+/gost89.o
+/gost94_keyx.o
+/gost_ameth.o
+/gost_asn1.o
+/gost_crypt.o
+/gost_ctl.o
+/gost_eng.o
+/gost_keywrap.o
+/gost_md.o
+/gost_params.o
+/gost_pmeth.o
+/gost_sign.o
+/gosthash.o
+/lib

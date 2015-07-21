@@ -1,0 +1,13 @@
+/lib
+/sha1-x86_64.o
+/sha1-x86_64.s
+/sha1_one.o
+/sha1dgst.o
+/sha256-x86_64.o
+/sha256-x86_64.s
+/sha256.o
+/sha512-x86_64.o
+/sha512-x86_64.s
+/sha512.o
+/sha_dgst.o
+/sha_one.o

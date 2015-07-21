@@ -1,0 +1,6 @@
+/lib
+/rc2_cbc.o
+/rc2_ecb.o
+/rc2_skey.o
+/rc2cfb64.o
+/rc2ofb64.o

@@ -1,0 +1,6 @@
+/libcrypto.a
+/libcrypto.pc
+/libssl.a
+/libssl.pc
+/openssl.pc
+/rehash.time

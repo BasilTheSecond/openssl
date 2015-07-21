@@ -1,0 +1,11 @@
+/dh_ameth.o
+/dh_asn1.o
+/dh_check.o
+/dh_depr.o
+/dh_err.o
+/dh_gen.o
+/dh_key.o
+/dh_lib.o
+/dh_pmeth.o
+/dh_prn.o
+/lib

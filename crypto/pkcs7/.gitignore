@@ -1,0 +1,9 @@
+/bio_pk7.o
+/lib
+/pk7_asn1.o
+/pk7_attr.o
+/pk7_doit.o
+/pk7_lib.o
+/pk7_mime.o
+/pk7_smime.o
+/pkcs7err.o

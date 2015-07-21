@@ -1,0 +1,12 @@
+/lib
+/ts_asn1.o
+/ts_conf.o
+/ts_err.o
+/ts_lib.o
+/ts_req_print.o
+/ts_req_utils.o
+/ts_rsp_print.o
+/ts_rsp_sign.o
+/ts_rsp_utils.o
+/ts_rsp_verify.o
+/ts_verify_ctx.o

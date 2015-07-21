@@ -1,0 +1,6 @@
+/lib
+/rc4-md5-x86_64.o
+/rc4-md5-x86_64.s
+/rc4-x86_64.o
+/rc4-x86_64.s
+/rc4_utl.o

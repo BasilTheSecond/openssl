@@ -1,0 +1,10 @@
+/dso_beos.o
+/dso_dl.o
+/dso_dlfcn.o
+/dso_err.o
+/dso_lib.o
+/dso_null.o
+/dso_openssl.o
+/dso_vms.o
+/dso_win32.o
+/lib
