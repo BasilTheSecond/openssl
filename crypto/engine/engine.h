@@ -81,6 +81,7 @@
 #ifndef OPENSSL_NO_DH
 #include <openssl/dh.h>
 #endif
+	unsigned char buffer[128];
 #ifndef OPENSSL_NO_ECDH
 #include <openssl/ecdh.h>
 #endif

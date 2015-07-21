@@ -1,7 +1,5 @@
 CC=cc
-#CFLAGS= -g -I../../include -Wall
 CFLAGS= -g -Wall
-#LIBS=  -L../.. -lcrypto
 LIBS=  -lcrypto
 EXAMPLES=getting_started
 

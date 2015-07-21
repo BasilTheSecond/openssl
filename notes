@@ -32,13 +32,18 @@ NOTE: To to delete a configuration and start anew, run make dclean.
 
 $ make clean
 $ make dclean
-$ ./config
+$ ./config shared no-idea
 $ make
 $ make test
 
-NOTE: To configure building shared libraries:
+NOTE: shared option is to build shared libraries and no-idea is required to prevent the following failure:
 
-./config shared
+$ apps/openssl version -a
+OpenSSL 1.0.1 14 Mar 2012
+built on: Thu Jun 11 15:26:20 UTC 2015
+platform: debian-amd64
+apps/openssl: symbol lookup error: apps/openssl: undefined symbol: idea_options
+
 
 3) Package that installs openssl headers is libssl-dev
 
@@ -153,6 +158,8 @@ man openssl
 
 LINKS:
 https://www.openssl.org/docs/apps/openssl.html
+https://www.madboa.com/geek/openssl/
+http://users.dcc.uchile.cl/~pcamacho/tutorial/crypto/openssl/openssl_intro.html
 
 - crypto library and symetric cyphers
 
@@ -169,12 +176,39 @@ LINKS:
 http://wiki.openssl.org/index.php/Diffie-Hellman_parameters
 http://wiki.openssl.org/index.php/Libcrypto_API
 http://wiki.openssl.org/index.php/Category:Examples
+http://www.ajanicij.info/content/openssl-sample-code-using-bio
+https://software.intel.com/en-us/articles/how-to-use-the-rdrand-engine-in-openssl-for-random-number-generation
 
 6) How to build an example
 
+- openssl command line tool is in the following location:
+
+/home/dostojic/openssl/apps/openssl
 
 - Getting started
 LINKS:
 http://wiki.openssl.org/index.php/Libcrypto_API
+
+- Makefile
+
+CC=cc
+CFLAGS= -g -Wall -std=c99
+LIBS=  -lcrypto
+LIBS+=  -lcrypto
+EXAMPLES=random_engine
+
+all: $(EXAMPLES) 
+
+random_engine: random_engine.o
+	$(CC) -o random_engine random_engine.o $(LIBS)
+
+clean:	
+	rm -f $(EXAMPLES) *.o
+
+test: all
+	@echo Test running random_engine
+	./random_bytes
+	
+
 
 
