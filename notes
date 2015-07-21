@@ -170,6 +170,11 @@ https://www.openssl.org/docs/crypto/
 
 man enc
 
+- all APIs
+
+LINKS:
+https://wiki.openssl.org/index.php/Documentation_Index
+
 5) Some examples:
 
 LINKS:
@@ -232,5 +237,139 @@ Check these links:
 
 http://wiki.openssl.org/index.php/Random_Numbers
 https://wiki.openssl.org/index.php/Compilation_and_Installation#FIPS_Capable_Library
+
+9) Encrypt and decrypt using command line tool:
+
+LINKS:
+https://www.madboa.com/geek/openssl/
+
+- Encrypt file.txt to file.enc using 256-bit AES in CBC mode
+openssl enc -e -aes-256-cbc -salt -in file.txt -out file.enc
+
+- Decrypt binary file.enc
+openssl enc -d -aes-256-cbc -in file.enc
+
+NOTES: 
+- To provide the password on the command line use  -pass pass:mySillyPassword and to
+provide it in the file use -pass file:/path/to/secret/password.txt
+
+- Use the -base64 option to get human readable output
+
+- To use Intel crypto engine:
+
+$ openssl engine
+(rsax) RSAX engine support
+(rdrand) Intel RDRAND engine
+(dynamic) Dynamic engine loading support
+
+$ echo "Hello world" | openssl enc -base64 -engine rdrand -e -aes-256-cbc -salt -k mypassword
+engine "rdrand" set.
+U2FsdGVkX1/tAB2rkJ6ScEYQtb88knJ8MQL+RUNJLu0=
+
+$ echo "U2FsdGVkX19B52jJk7K59N9l51VHaGlbHjXsiEAFvPE=" | openssl enc -base64 -engine rdrand -d -aes-256-cbc -salt -k mypassword
+engine "rdrand" set.
+Hello world
+
+NOTE:
+echo will silently attach a newline character to your string. Consider using its -n option 
+if you want to avoid that situation, which could be important if you’re trying to encode a password 
+or authentication string.
+
+$ echo -n "Hello world" | openssl enc -base64 -engine rdrand -e -aes-256-cbc -salt -k mypassword
+engine "rdrand" set.
+U2FsdGVkX19htmB4KOwKrppo0DeGmvriqV7StjmJumo=
+
+
+$ echo "U2FsdGVkX19htmB4KOwKrppo0DeGmvriqV7StjmJumo=" | openssl enc -base64 -engine rdrand -d -aes-256-cbc -salt -k mypassword
+engine "rdrand" set.
+Hello world
+
+NOTE:
+Interesting thing is that every time we encrypt the same plane text with the same password we get a totally different
+cyphertext. This is called many-time pad i.e. we can use the same key many times until it (so to speak) expires (i.e becomes
+non-secure). There is a formula for that. 
+
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -salt -k mypassword
+U2FsdGVkX1+25SPXJ0I6yb7UDriqLlZ7BOH6XaaOIv8=
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -salt -k mypassword
+U2FsdGVkX1/D4LKrHMns8diH/xy4n1jaqGcgxJ2zTa0=
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -salt -k mypassword
+U2FsdGVkX19ACCl7hzDqsaf8yTeYHvXdik2CqlU1HlI=
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -salt -k mypassword
+U2FsdGVkX1/RRiXD2VDQgKKV3G1Dr/GTsfpLEG2uHas=
+
+NOTE:
+The encrypted text always starts with the same pattern U2FsdGVkX1 and ends with =.
+
+Why is this?
+
+
+To get the same output we can use the same salt option -S or -nosalt:
+
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -S abc -k mypassword
+U2FsdGVkX1+rwAAAAAAAAKUJcj5xdSOpb9vdA3OU0MI=
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -S abc -k mypassword
+U2FsdGVkX1+rwAAAAAAAAKUJcj5xdSOpb9vdA3OU0MI=
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -S abc -k mypassword
+U2FsdGVkX1+rwAAAAAAAAKUJcj5xdSOpb9vdA3OU0MI=
+$ echo -n "Hello world" | openssl enc -base64 -e -aes-256-cbc -S abc -k mypassword
+U2FsdGVkX1+rwAAAAAAAAKUJcj5xdSOpb9vdA3OU0MI=
+
+- The -p option will give more details:
+
+$ echo -n "Hello world" | openssl enc -base64 -e -salt -aes-256-cbc -k mypassword -p
+salt=529554771523DDD7
+key=5233A4858606A7759ED3BA4BC3DBC13B25F7CF322AC281F7676ABC55A733CC3A
+iv =3AAD41058B6DAF5E8C17CE04E6F4B6B9
+U2FsdGVkX19SlVR3FSPd15B9FoIDK4iTnwukbMDGsc0=
+
+
+- Generate password hash will salt will generate always the same hash
+$ openssl passwd -salt 8E MySecret
+8E4vqBR4UOYF.
+$ openssl passwd -salt 8E MySecret
+8E4vqBR4UOYF.
+
+
+- Generate password hash without salt will generate a different hash every time
+openssl passwd MySecret
+
+$ openssl passwd MySecret
+8SIDmC50PkWmE
+$ openssl passwd MySecret
+kVOC/Fo5VwGMM
+
+- Longer hash (MD5-based)
+$ openssl passwd -1 MySecret
+$ openssl passwd -1 -salt sXiKzkus MySecret
+
+- Some AES methods:
+aes-[128|192|256]-cbc  128/192/256 bit AES in CBC mode
+aes-[128|192|256]      Alias for aes-[128|192|256]-cbc
+aes-[128|192|256]-cfb  128/192/256 bit AES in 128 bit CFB mode
+aes-[128|192|256]-cfb1 128/192/256 bit AES in 1 bit CFB mode
+aes-[128|192|256]-cfb8 128/192/256 bit AES in 8 bit CFB mode
+aes-[128|192|256]-ecb  128/192/256 bit AES in ECB mode
+aes-[128|192|256]-ofb  128/192/256 bit AES in OFB mode
+
+- Supported engines
+$ openssl engine
+(rsax) RSAX engine support
+(rdrand) Intel RDRAND engine
+(dynamic) Dynamic engine loading support
+
+10) Digest methods:
+-md4            to use the md4 message digest algorithm
+-md5            to use the md5 message digest algorithm
+-ripemd160      to use the ripemd160 message digest algorithm
+-sha            to use the sha message digest algorithm
+-sha1           to use the sha1 message digest algorithm
+-sha224         to use the sha224 message digest algorithm
+-sha256         to use the sha256 message digest algorithm
+-sha384         to use the sha384 message digest algorithm
+-sha512         to use the sha512 message digest algorithm
+-whirlpool      to use the whirlpool message digest algorithm
+
+
 
 
