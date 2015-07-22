@@ -216,6 +216,9 @@ decrypt(unsigned char *ciphertext,
 static int
 handleErrors(void)
 {
+  unsigned long err = ERR_get_error();
+  char *errstr = ERR_error_string(err, NULL);
+	printf("Error message: %s\n", errstr);
 	return -1;
 }
 
