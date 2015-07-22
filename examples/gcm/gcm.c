@@ -42,18 +42,31 @@ main(	int argc,
   OPENSSL_config(NULL);
 
   /* ... Do some crypto stuff here ... */
-  
+
   for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "-e") == 0) {
-			
+			unsigned char *plaintext = "Hell, world!!!1111111111111111111111111";
+			int plaintext_len = strlen(plaintext);
+			unsigned char *aad = "AAD";
+			int aad_len = strlen(aad);
+			unsigned char *key = "0123456789abcdef0123456789abcdef";
+			unsigned char *iv = "0123456789abcdef";
+			unsigned char ciphertext[1024];
+			unsigned char tag[16];
+
+			rc = encrypt(plaintext, 
+									 plaintext_len,
+									 aad,
+									 aad_len,
+									 key,
+									 iv,
+									 ciphertext,
+									 tag);
 		}
 		else if (strcmp(argv[i], "-d") == 0) {
-	
 		}
-		i++;
   }
 
-_exit:
   /* Clean up */
 
   /* Removes all digests and ciphers */
@@ -121,6 +134,7 @@ encrypt(unsigned char *plaintext,
 
 	/* Finalise the encryption. Normally ciphertext bytes may be written at
 	 * this stage, but this does not occur in GCM mode
+	 * NOTE: What does that mean?
 	 */
 	if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) {
 		return handleErrors();
@@ -134,6 +148,10 @@ encrypt(unsigned char *plaintext,
 
 	/* Clean up */
 	EVP_CIPHER_CTX_free(ctx);
+	
+	//printf("ciphertext_len=%d\n", ciphertext_len);
+	
+	write(1, ciphertext, ciphertext_len);
 
 	return ciphertext_len;
 }
