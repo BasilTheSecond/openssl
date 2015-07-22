@@ -380,5 +380,59 @@ $ openssl engine
 -whirlpool      to use the whirlpool message digest algorithm
 
 
+11) Authenticated encryption
+
+LINKS:
+https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption
+https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
+https://wiki.openssl.org/index.php/Manual:EVP_EncryptInit%283%29#GCM_Mode
+
+- We need to use GCM or EAX standard because they are encrypt then mac which is a provably secure AE.
+
+int AES_GCM_Init(	AES_GCM_CTX *ain, 
+									unsigned char *nonce, unsigned long noncelen, // must be unique per key but need not be random, can be a counter
+									unsigned char *key, unsigned int klen)
+									
+int AES_GCM_EncryptUpdate(AES_GCM_CTX *a, 
+													unsigned char *aad, unsigned ling aadlen, 
+													unsigned char *data, unsigned long datalen
+													unsigned char *out, unsigned ling *outlen) // out doesn't include aad which is sent in the clear
+
+GCM method uses counter for IV (nonce unique per key), IV doesn't need to be random it can be just a counter. It also has
+associated data which is not intended to be encrypted (AEAD= Authenticated encryption with associated data)
+
+NOTE: It appears that AES_GCM_ APIs are not in OpenSSL 1.0.1 and are replaced by EVP APIs
+
+
+- MAC definition (from wikipedia)
+In cryptography, a message authentication code (MAC) is a short piece of information used to authenticate a message 
+and to provide integrity and authenticity assurances on the message. Integrity assurances detect accidental 
+and intentional message changes, while authenticity assurances affirm the message's origin.
+
+A MAC algorithm, sometimes called a keyed (cryptographic) hash function 
+(however, cryptographic hash function is only one of the possible ways to generate MACs), accepts as input a secret key 
+and an arbitrary-length message to be authenticated, and outputs a MAC (sometimes known as a tag). 
+The MAC value protects both a message's data integrity as well as its authenticity, by allowing verifiers 
+(who also possess the secret key) to detect any changes to the message content.
+
+
+- For the sample code look into: 
+openssl/apps/enc.c
+openssl/crypto/evp/e_aes.c
+
+NOTE: in e_aes.c check EVP_CTRL_GCM_SET_IVLEN and EVP_CTRL_GCM_SET_TAG
+
+- To dump encoded output we could use:
+
+cat file.enc | hexdump -C
+
+
+- Check the padding as follows:
+
+$ echo "hi1111111111111" | openssl enc -aes-256-cbc -e -K 1001001 -iv 0100110 | openssl enc -aes-256-cbc -d -nopad -K 1001001 -iv 0100110 | hd
+00000000  68 69 31 31 31 31 31 31  31 31 31 31 31 31 31 0a  |hi1111111111111.|
+00000010  10 10 10 10 10 10 10 10  10 10 10 10 10 10 10 10  |................|
+00000020
+
 
 
