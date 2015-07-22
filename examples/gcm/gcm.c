@@ -2,6 +2,8 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>
 
 static int 
 encrypt(unsigned char *plaintext, 
@@ -42,31 +44,59 @@ main(	int argc,
   OPENSSL_config(NULL);
 
   /* ... Do some crypto stuff here ... */
+  
+	unsigned char *plaintext_in = (unsigned char *)"Hello, world";
+	//unsigned char *plaintext_in = (unsigned char *)"Hello";
+	int plaintext_len = strlen((const char *)plaintext_in);
+	//unsigned char *aad = (unsigned char *)"AAD";
+	unsigned char *aad = (unsigned char *)"";
+	int aad_len = strlen((const char *)aad);
+	//unsigned char *key = (unsigned char *)"0123456789abcdef0123456789abcdef";
+	//unsigned char *iv = (unsigned char *)"0123456789abcdef";
+	unsigned char key[32] = {	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 
+														0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 
+														0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 
+														0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,};
+/*	unsigned char iv[16] = {	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, */
+/*														0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};*/
+	unsigned char iv[16] = {	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 
+														0x08, 0x09, 0x0a, 0x0b};
+	unsigned char ciphertext[1024];
+	unsigned char plaintext_out[1024];
+	unsigned char tag[16];
+	
+	rc = encrypt(plaintext_in, 
+						 plaintext_len,
+						 aad,
+						 aad_len,
+						 key,
+						 iv,
+						 ciphertext,
+						 tag);
 
-  for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-e") == 0) {
-			unsigned char *plaintext = "Hell, world!!!1111111111111111111111111";
-			int plaintext_len = strlen(plaintext);
-			unsigned char *aad = "AAD";
-			int aad_len = strlen(aad);
-			unsigned char *key = "0123456789abcdef0123456789abcdef";
-			unsigned char *iv = "0123456789abcdef";
-			unsigned char ciphertext[1024];
-			unsigned char tag[16];
+	if (rc == -1) {
+		goto _exit;
+	}
+	
+	write(1, ciphertext, rc);
+	//write(1, tag, 16);
+	
+/*	rc = decrypt(ciphertext, */
+/*							 rc,*/
+/*							 aad,*/
+/*							 aad_len,*/
+/*							 tag,*/
+/*							 key,*/
+/*							 iv,*/
+/*							 plaintext_out);*/
+							 
+/*	if (rc == -1) {*/
+/*		goto _exit;*/
+/*	}	*/
+/*	*/
+/*	write(1, plaintext_out, rc);	*/
 
-			rc = encrypt(plaintext, 
-									 plaintext_len,
-									 aad,
-									 aad_len,
-									 key,
-									 iv,
-									 ciphertext,
-									 tag);
-		}
-		else if (strcmp(argv[i], "-d") == 0) {
-		}
-  }
-
+_exit:
   /* Clean up */
 
   /* Removes all digests and ciphers */
@@ -108,9 +138,9 @@ encrypt(unsigned char *plaintext,
 		return handleErrors();
 	}
 	/* Set IV length if default 12 bytes (96 bits) is not appropriate */
-	if(1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL)) {
-		return handleErrors();
-	}
+	//if(1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL)) {
+	//	return handleErrors();
+	//}
 
 	/* Initialise key and IV */
 	if(1 != EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv))  {
@@ -120,9 +150,9 @@ encrypt(unsigned char *plaintext,
 	/* Provide any AAD data. This can be called zero or more times as
 	 * required
 	 */
-	if(1 != EVP_EncryptUpdate(ctx, NULL, &len, aad, aad_len)) {
-		return handleErrors();
-	}
+	//if(1 != EVP_EncryptUpdate(ctx, NULL, &len, aad, aad_len)) {
+	//	return handleErrors();
+	//}
 
 	/* Provide the message to be encrypted, and obtain the encrypted output.
 	 * EVP_EncryptUpdate can be called multiple times if necessary
@@ -148,10 +178,6 @@ encrypt(unsigned char *plaintext,
 
 	/* Clean up */
 	EVP_CIPHER_CTX_free(ctx);
-	
-	//printf("ciphertext_len=%d\n", ciphertext_len);
-	
-	write(1, ciphertext, ciphertext_len);
 
 	return ciphertext_len;
 }
@@ -182,9 +208,9 @@ decrypt(unsigned char *ciphertext,
 	}
 
 	/* Set IV length. Not necessary if this is 12 bytes (96 bits) */
-	if(!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL)) {
-		return handleErrors();
-	}
+	//if(!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, 16, NULL)) {
+	//	return handleErrors();
+	//}
 
 	/* Initialise key and IV */
 	if(!EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv)) {
@@ -206,9 +232,9 @@ decrypt(unsigned char *ciphertext,
 	plaintext_len = len;
 
 	/* Set expected tag value. Works in OpenSSL 1.0.1d and later */
-	if(!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
-		return handleErrors();
-	}
+	//if(!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
+	//	return handleErrors();
+	//}
 
 	/* Finalise the decryption. A positive return value indicates success,
 	 * anything else is a failure - the plaintext is not trustworthy.
