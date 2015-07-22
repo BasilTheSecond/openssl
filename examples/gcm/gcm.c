@@ -78,23 +78,23 @@ main(	int argc,
 		goto _exit;
 	}
 	
-	write(1, ciphertext, rc);
+	//write(1, ciphertext, rc);
 	//write(1, tag, 16);
 	
-/*	rc = decrypt(ciphertext, */
-/*							 rc,*/
-/*							 aad,*/
-/*							 aad_len,*/
-/*							 tag,*/
-/*							 key,*/
-/*							 iv,*/
-/*							 plaintext_out);*/
+	rc = decrypt(ciphertext, 
+							 rc,
+							 aad,
+							 aad_len,
+							 tag,
+							 key,
+							 iv,
+							 plaintext_out);
 							 
-/*	if (rc == -1) {*/
-/*		goto _exit;*/
-/*	}	*/
-/*	*/
-/*	write(1, plaintext_out, rc);	*/
+	if (rc == -1) {
+		goto _exit;
+	}	
+	
+	//write(1, plaintext_out, rc);	
 
 _exit:
   /* Clean up */
@@ -216,19 +216,25 @@ decrypt(unsigned char *ciphertext,
 	if(!EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv)) {
 		return handleErrors();
 	}
+	
+	if(!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
+		return handleErrors();
+	}
 
 	/* Provide any AAD data. This can be called zero or more times as
 	 * required
 	 */
-	if(!EVP_DecryptUpdate(ctx, NULL, &len, aad, aad_len)) {
-		return handleErrors();
-	}
+	//if(!EVP_DecryptUpdate(ctx, NULL, &len, aad, aad_len)) {
+	//	return handleErrors();
+	//}
 	/* Provide the message to be decrypted, and obtain the plaintext output.
 	 * EVP_DecryptUpdate can be called multiple times if necessary
 	 */
 	if(!EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len)) {
 		return handleErrors();
 	}
+	
+	EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len);
 	plaintext_len = len;
 
 	/* Set expected tag value. Works in OpenSSL 1.0.1d and later */
@@ -246,6 +252,7 @@ decrypt(unsigned char *ciphertext,
 
 	if(ret > 0)
 	{
+		printf("Success!!!\n");
 		/* Success */
 		plaintext_len += len;
 		return plaintext_len;
@@ -255,6 +262,9 @@ decrypt(unsigned char *ciphertext,
 		/* Verify failed */
 		return -1;
 	}
+
+	plaintext_len += len;
+	return plaintext_len;
 }
 
 static int
