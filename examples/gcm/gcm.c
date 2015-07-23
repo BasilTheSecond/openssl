@@ -80,11 +80,9 @@ main(	int argc,
 	//aad[0] ^= 0xff; // Tamper with the additional (plain-text) data
 	
 	retv = decrypt();
-	
-	//assert(memcmp(msg, decm, declen) == 0);
 
 	// Check that ciphertext or AAD hasn't been tampered with
-	if (retv == 1) {
+	if (retv == 1 && memcmp(msg, decm, declen) == 0) {
 		printf("Success\n");
 	}
 	else {
