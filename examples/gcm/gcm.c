@@ -21,11 +21,10 @@ main(	int argc,
 	unsigned char encm[1024];
 	unsigned char msg[1024];
 	unsigned char decm[1024];
-	unsigned char aad[64]; // Additional associated data (can be any size)
+	unsigned char aad[1024]; // Additional associated data (can be any size)
+	unsigned char tag[TAG_SIZE];
 	
-	// Create shared key
-	memset(keybuf, 0, sizeof(keybuf));
-	
+	// Generate shared key
 	int retv = RAND_bytes(keybuf, sizeof(keybuf));
 	
 	if (retv != 1) {
@@ -33,9 +32,7 @@ main(	int argc,
 		goto __exit;
 	}
 	
-	// Create IV
-	memset(ivbuf, 0, sizeof(ivbuf));
-	
+	// Generate IV
 	retv = RAND_bytes(ivbuf, sizeof(ivbuf));
 	
 	if (retv != 1) {
@@ -44,6 +41,8 @@ main(	int argc,
 	}
 	
 	memset(aad, 0, sizeof(aad));
+	
+	
 
 
 	//Encrypt the data first.
@@ -97,8 +96,8 @@ main(	int argc,
 	//encm[0] ^= 0xff; // Corrupt the cipertext
 	//aad[0] ^= 0xff; // Corrupt the additional (plain-text) data
 
-	//Append authentication tag at the end.
-	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)encm + enclen);
+	//Get authentication tag
+	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)tag);
 
 	if (retv != 1) {
 		printf("Error\n");
@@ -124,8 +123,8 @@ main(	int argc,
 		goto __exit;
 	}
 
-	//Set Tag from the data.
-	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_TAG, TAG_SIZE, (unsigned char *)encm + enclen);
+	//Set authentication tag
+	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_TAG, TAG_SIZE, (unsigned char *)tag);
 
 	if (retv != 1) {
 		printf("Error\n");
