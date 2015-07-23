@@ -92,6 +92,8 @@ main(	int argc,
 		goto __exit;
 	}
 	
+	//printf("enclen=%d\n", enclen);
+	
 	// Check that authentication
 	//encm[0] ^= 0xff; // Corrupt the cipertext
 	//aad[0] ^= 0xff; // Corrupt the additional (plain-text) data
