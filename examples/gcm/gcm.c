@@ -9,8 +9,8 @@
 #define TAG_SIZE 16
 #define IV_SIZE 16
 #define KEY_SIZE 32 // 32 bytes for AES-256
-#define MESSAGE_SIZE 128//1024
-#define AAD_MESSAGE_SIZE 128 //1024 // Additional associated data (must be divisible by 32)
+#define MESSAGE_SIZE 128
+#define AAD_MESSAGE_SIZE 16 // Additional associated data (AAD)
 
 static EVP_CIPHER *cipher = NULL;
 static int enclen, declen, declen2, enclen2;
