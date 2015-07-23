@@ -1,10 +1,8 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
 #include <openssl/rand.h>
 #include <string.h>
 
-#define     GCM_ADD     "0000"
 #define     TAG_SIZE    16
 
 int 
@@ -14,7 +12,8 @@ main(	int argc,
 	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
 
 	//Get the cipher.
-	const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
+	//const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
+	const EVP_CIPHER *cipher  = EVP_aes_256_gcm ();
 
 	unsigned char keybuf[32]; // 32 bytes for AES-256
 	unsigned char ivbuf[16];
@@ -22,6 +21,7 @@ main(	int argc,
 	unsigned char encm[1024];
 	unsigned char msg[1024];
 	unsigned char decm[1024];
+	unsigned char aad[64]; // Additional associated data (can be any size)
 	
 	// Create shared key
 	memset(keybuf, 0, sizeof(keybuf));
@@ -42,6 +42,8 @@ main(	int argc,
 		printf("Error\n");
 		goto __exit;
 	}
+	
+	memset(aad, 0, sizeof(aad));
 
 
 	//Encrypt the data first.
@@ -67,7 +69,7 @@ main(	int argc,
 	}
 
 	//Add Additional associated data (AAD). [Optional for GCM]
-	retv    = EVP_EncryptUpdate (ctx, NULL, (int *)&enclen, (const unsigned char *)GCM_ADD, strlen(GCM_ADD));
+	retv    = EVP_EncryptUpdate (ctx, NULL, (int *)&enclen, (const unsigned char *)aad, sizeof(aad));
 
 	if (retv != 1) {
 		printf("Error\n");
@@ -91,7 +93,9 @@ main(	int argc,
 		goto __exit;
 	}
 	
-	//encm[0] ^= 0xff; // Corrupt the message to check that authentication works
+	// Check that authentication
+	//encm[0] ^= 0xff; // Corrupt the cipertext
+	//aad[0] ^= 0xff; // Corrupt the additional (plain-text) data
 
 	//Append authentication tag at the end.
 	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)encm + enclen);
@@ -137,8 +141,7 @@ main(	int argc,
 	}
 
 	//Add Additional associated data (AAD).
-	retv    = EVP_DecryptUpdate (ctx, NULL, (int *)&declen, (const unsigned char *)GCM_ADD,
-			                         strlen((const char *)GCM_ADD));
+	retv    = EVP_DecryptUpdate (ctx, NULL, (int *)&declen, (const unsigned char *)aad, sizeof(aad));
 
 	if (retv != 1) {
 		printf("Error\n");
