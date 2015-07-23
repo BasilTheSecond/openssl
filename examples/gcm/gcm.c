@@ -256,7 +256,7 @@ decrypt() {
 	declen += declen2;
 
 __exit:
-	// Scrubb the memory and release the context
+	// Scrub the memory and release the context
 	EVP_CIPHER_CTX_cleanup(ctx); 
 	
 	return retv;
