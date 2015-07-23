@@ -191,7 +191,7 @@ encrypt()
 	}
 
 __exit:
-	// Scrubb the memory
+	// Scrub the memory
 	EVP_CIPHER_CTX_cleanup(ctx); 
 	
 	return retv;
