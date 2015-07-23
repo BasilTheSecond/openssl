@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <unistd.h>
 
+//#define DUMP_ALL // NOTE: use ./gcm | hexdump -C
 #define TAG_SIZE 16
 #define IV_SIZE 16
 #define KEY_SIZE 32 // 32 bytes for AES-256
@@ -23,16 +24,19 @@ static unsigned char tag[TAG_SIZE];
 
 static int encrypt();
 static int decrypt();
+
+#if defined(DUMP_ALL)
 static void dump(	const char *str,
 									const void *buf, 
 									size_t count);
+#else
+#define dump(...)
+#endif
 
 int 
 main(	int argc, 
 			char *argv[])
 {
-	(void)dump;
-
 	//Select the cipher.
 	//cipher  = EVP_aes_128_gcm ();
 	cipher  = (EVP_CIPHER *)EVP_aes_256_gcm ();
@@ -256,6 +260,7 @@ __exit:
 	return retv;
 }
 
+#if defined(DUMP_ALL)
 static void 
 dump(	const char *str,
 			const void *buf, 
@@ -265,4 +270,5 @@ dump(	const char *str,
 	}
 	write(1, buf, count);
 }
+#endif
 
