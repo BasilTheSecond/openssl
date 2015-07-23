@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <unistd.h>
 
-//#define DUMP_ALL // NOTE: use ./gcm | hexdump -C
+#define DUMP_ALL // NOTE: use ./gcm | hexdump -C
 #define TAG_SIZE 16
 #define IV_SIZE 16
 #define KEY_SIZE 32 // 32 bytes for AES-256
