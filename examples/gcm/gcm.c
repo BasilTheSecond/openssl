@@ -1,6 +1,7 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
+#include <openssl/rand.h>
 #include <string.h>
 
 #define     GCM_IV      "000000000000"
@@ -31,23 +32,42 @@ main(	int argc,
 
 
 	
-	unsigned char keybuf[1024];
+	unsigned char keybuf[32]; // 32 bytes for AES-256
+	unsigned char ivbuf[16];
 	int enclen, declen, declen2, enclen2;
 	unsigned char encm[1024];
 	unsigned char msg[1024];
 	unsigned char decm[1024];
+	
+	// Create shared key
+	memset(keybuf, 0, sizeof(keybuf));
+	
+	int retv = RAND_bytes(keybuf, sizeof(keybuf));
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
+	// Create IV
+	memset(ivbuf, 0, sizeof(ivbuf));
+	
+	retv = RAND_bytes(ivbuf, sizeof(ivbuf));
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 
 	//Encrypt the data first.
 	//Set the cipher and context only.
-	int retv    = EVP_EncryptInit (ctx, cipher, NULL, NULL);
-	
-	(void)retv;
+	retv    = EVP_EncryptInit (ctx, cipher, NULL, NULL);
 
 	//Set the nonce and tag sizes.
 	//Set IV length. [Optional for GCM].
 
-	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, strlen((const char *)GCM_IV), NULL);
+	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(ivbuf), NULL);
 	
 	if (retv != 1) {
 		printf("Error\n");
@@ -55,7 +75,7 @@ main(	int argc,
 	}
 
 	//Now initialize the context with key and IV. 
-	retv    = EVP_EncryptInit (ctx, NULL, (const unsigned char *)keybuf, (const unsigned char *)GCM_IV);
+	retv    = EVP_EncryptInit (ctx, NULL, (const unsigned char *)keybuf, (const unsigned char *)ivbuf);
 	
 	if (retv != 1) {
 		printf("Error\n");
@@ -107,7 +127,7 @@ main(	int argc,
 	}
 
 	//Set Nonce size.
-	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, strlen((const char *)GCM_IV), NULL);
+	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(ivbuf), NULL);
 
 	if (retv != 1) {
 		printf("Error\n");
@@ -123,7 +143,7 @@ main(	int argc,
 	}
 
 	//Set key and IV (nonce).
-	retv    = EVP_DecryptInit (ctx, NULL, (const unsigned char*)keybuf, (const unsigned char *)GCM_IV);
+	retv    = EVP_DecryptInit (ctx, NULL, (const unsigned char*)keybuf, (const unsigned char *)ivbuf);
 
 	if (retv != 1) {
 		printf("Error\n");
