@@ -123,10 +123,11 @@ __exit:
 
 static int
 encrypt() {
-	// Create the context
-	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-	
-	assert(ctx != NULL);
+	// Create and initialize the context
+	EVP_CIPHER_CTX evp_cipher_ctx;
+	EVP_CIPHER_CTX *ctx = &evp_cipher_ctx;
+  EVP_CIPHER_CTX_init(ctx);
+  
 	assert(cipher != NULL);
 	
 	// Set the cipher and context
@@ -184,18 +185,19 @@ encrypt() {
 	}
 
 __exit:
-	// Destroy the context
-	EVP_CIPHER_CTX_free(ctx);
+	// Scrubb the memory and release the context
+	EVP_CIPHER_CTX_cleanup(ctx); 
 	
 	return retv;
 }
 
 static int
 decrypt() {
-	// Create the context
-	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+	// Create and initialize the context
+	EVP_CIPHER_CTX evp_cipher_ctx;
+	EVP_CIPHER_CTX *ctx = &evp_cipher_ctx;
+  EVP_CIPHER_CTX_init(ctx);
 	
-	assert(ctx != NULL);
 	assert(cipher != NULL);
 	
 	// Set the cipher and context
@@ -254,8 +256,8 @@ decrypt() {
 	declen += declen2;
 
 __exit:
-	// Destroy the context
-	EVP_CIPHER_CTX_free(ctx);
+	// Scrubb the memory and release the context
+	EVP_CIPHER_CTX_cleanup(ctx); 
 	
 	return retv;
 }
