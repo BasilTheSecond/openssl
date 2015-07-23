@@ -3,26 +3,35 @@
 #include <openssl/rand.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 
-#define     TAG_SIZE    16
+#define TAG_SIZE 16
+#define IV_SIZE 16
+#define KEY_SIZE 32 // 32 bytes for AES-256
+#define MESSAGE_SIZE 1024
+#define AAD_MESSAGE_SIZE 1024 // Additional associated data (must be divisible by 32)
 
-static unsigned char keybuf[32]; // 32 bytes for AES-256
-static unsigned char ivbuf[16];
-static int enclen, declen, declen2, enclen2;
-static unsigned char encm[1024];
-static unsigned char msg[1024];
-static unsigned char decm[1024];
-static unsigned char aad[1024]; // Additional associated data (can be any size)
-static unsigned char tag[TAG_SIZE];
 static EVP_CIPHER *cipher = NULL;
+static int enclen, declen, declen2, enclen2;
+static unsigned char keybuf[KEY_SIZE]; 
+static unsigned char ivbuf[IV_SIZE];
+static unsigned char encm[MESSAGE_SIZE];
+static unsigned char msg[MESSAGE_SIZE];
+static unsigned char decm[MESSAGE_SIZE];
+static unsigned char aad[AAD_MESSAGE_SIZE];
+static unsigned char tag[TAG_SIZE];
 
 static int encrypt();
 static int decrypt();
+static void dump(	const void *buf, 
+									size_t count);
 
 int 
 main(	int argc, 
 			char *argv[])
 {
+	(void)dump;
+
 	//Select the cipher.
 	//cipher  = EVP_aes_128_gcm ();
 	cipher  = (EVP_CIPHER *)EVP_aes_256_gcm ();
@@ -231,5 +240,11 @@ __exit:
 	EVP_CIPHER_CTX_free(ctx);
 	
 	return retv;
+}
+
+static void 
+dump(	const void *buf, 
+			size_t count) {
+	write(1, buf, count);
 }
 
