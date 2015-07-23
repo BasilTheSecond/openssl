@@ -2,6 +2,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <string.h>
+#include <assert.h>
 
 #define     TAG_SIZE    16
 
@@ -10,6 +11,8 @@ main(	int argc,
 			char *argv[])
 {
 	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
+	
+	assert(ctx != NULL);
 
 	//Get the cipher.
 	//const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
@@ -112,12 +115,15 @@ main(	int argc,
 	//DECRYPTION PART
 	//Now Decryption of the data.
 	//Then decrypt the data.
+
+	
+	ctx     = EVP_CIPHER_CTX_new();
+	
+	assert(ctx != NULL);
 	
 	//Get the cipher.
 	//const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
 	cipher  = EVP_aes_256_gcm ();
-	
-	ctx     = EVP_CIPHER_CTX_new();
 	
 	//Set just cipher.
 	retv    = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
