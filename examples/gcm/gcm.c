@@ -14,6 +14,7 @@ static unsigned char msg[1024];
 static unsigned char decm[1024];
 static unsigned char aad[1024]; // Additional associated data (can be any size)
 static unsigned char tag[TAG_SIZE];
+static EVP_CIPHER *cipher = NULL;
 
 static int encrypt();
 static int decrypt();
@@ -22,8 +23,52 @@ int
 main(	int argc, 
 			char *argv[])
 {
+	//Select the cipher.
+	//cipher  = EVP_aes_128_gcm ();
+	cipher  = (EVP_CIPHER *)EVP_aes_256_gcm ();
+	
+	// Clear buffers (optional)
+	memset(keybuf, 0, sizeof(keybuf));
+	memset(ivbuf, 0, sizeof(ivbuf));
+	memset(encm, 0, sizeof(encm));
+	memset(msg, 0, sizeof(msg));
+	memset(decm, 0, sizeof(decm));	
+	memset(aad, 0, sizeof(aad));
+	memset(tag, 0, sizeof(tag));
+	
+	// Generate shared key
+	int retv = RAND_bytes(keybuf, sizeof(keybuf));
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
+	// Generate IV
+	retv = RAND_bytes(ivbuf, sizeof(ivbuf));
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
+	// Prepare AAD
+	retv = RAND_bytes(aad, sizeof(aad));
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
+	// Prepare plaintext
+	retv = RAND_bytes(msg, sizeof(msg));
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
-	int retv = encrypt();
+	retv = encrypt();
 	
 	if (retv != 1) {
 		printf("Error\n");
@@ -53,33 +98,11 @@ static int
 encrypt() {
 	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
 	
-	assert(ctx != NULL);
-
-	//Get the cipher.
-	//const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
-	const EVP_CIPHER *cipher  = EVP_aes_256_gcm ();
-	
-	// Generate shared key
-	int retv = RAND_bytes(keybuf, sizeof(keybuf));
-	
-	if (retv != 1) {
-		printf("Error\n");
-		goto __exit;
-	}
-	
-	// Generate IV
-	retv = RAND_bytes(ivbuf, sizeof(ivbuf));
-	
-	if (retv != 1) {
-		printf("Error\n");
-		goto __exit;
-	}
-	
-	memset(aad, 0, sizeof(aad));
-
-	//Encrypt the data first.
 	//Set the cipher and context only.
-	retv    = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
+	assert(ctx != NULL);
+	assert(cipher != NULL);
+	
+	int retv    = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
 
 	//Set the nonce and tag sizes.
 	//Set IV length. [Optional for GCM].
@@ -148,20 +171,12 @@ __exit:
 
 static int
 decrypt() {
-	//DECRYPTION PART
-	//Now Decryption of the data.
-	//Then decrypt the data.
-
-	
 	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
 	
+	//Set the cipher and context only.
 	assert(ctx != NULL);
+	assert(cipher != NULL);
 	
-	//Get the cipher.
-	//const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
-	const EVP_CIPHER *cipher  = EVP_aes_256_gcm ();
-	
-	//Set just cipher.
 	int retv    = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
 
 	if (retv != 1) {
