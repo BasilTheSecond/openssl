@@ -36,7 +36,7 @@ main(	int argc,
 	memset(aad, 0, sizeof(aad));
 	memset(tag, 0, sizeof(tag));
 	
-	// Generate shared key
+	// Generate the shared key
 	int retv = RAND_bytes(keybuf, sizeof(keybuf));
 	
 	if (retv != 1) {
@@ -44,7 +44,7 @@ main(	int argc,
 		goto __exit;
 	}
 	
-	// Generate IV
+	// Generate the IV (nonce)
 	retv = RAND_bytes(ivbuf, sizeof(ivbuf));
 	
 	if (retv != 1) {
@@ -52,7 +52,7 @@ main(	int argc,
 		goto __exit;
 	}
 	
-	// Prepare AAD
+	// Prepare the additional associated data (AAD)
 	retv = RAND_bytes(aad, sizeof(aad));
 	
 	if (retv != 1) {
@@ -60,7 +60,7 @@ main(	int argc,
 		goto __exit;
 	}
 	
-	// Prepare plaintext
+	// Prepare the plaintext
 	retv = RAND_bytes(msg, sizeof(msg));
 	
 	if (retv != 1) {
@@ -80,6 +80,8 @@ main(	int argc,
 	//aad[0] ^= 0xff; // Tamper with the additional (plain-text) data
 	
 	retv = decrypt();
+	
+	//assert(memcmp(msg, decm, declen) == 0);
 
 	// Check that ciphertext or AAD hasn't been tampered with
 	if (retv == 1) {
@@ -96,65 +98,60 @@ __exit:
 
 static int
 encrypt() {
-	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
+	// Create the context
+	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
 	
-	//Set the cipher and context only.
 	assert(ctx != NULL);
 	assert(cipher != NULL);
 	
-	int retv    = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
+	// Set the cipher and context
+	int retv = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
 
-	//Set the nonce and tag sizes.
-	//Set IV length. [Optional for GCM].
-
-	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(ivbuf), NULL);
+	// Set IV (nonce) size
+	retv = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(ivbuf), NULL);
 	
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 
-	//Now initialize the context with key and IV. 
-	retv    = EVP_EncryptInit_ex(ctx, NULL, NULL, (const unsigned char *)keybuf, (const unsigned char *)ivbuf);
+	// Set the key and IV (nonce)
+	retv = EVP_EncryptInit_ex(ctx, NULL, NULL, (const unsigned char *)keybuf, (const unsigned char *)ivbuf);
 	
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 
-	//[Optional for GCM]
-	//Add Additional associated data (AAD). 
-	// This can be called zero or more times as required
-	retv    = EVP_EncryptUpdate(ctx, NULL, (int *)&enclen, (const unsigned char *)aad, sizeof(aad));
+	// Add AAD
+	// NOTE: Called zero (when there is no AAD) or more times as required
+	retv = EVP_EncryptUpdate(ctx, NULL, (int *)&enclen, (const unsigned char *)aad, sizeof(aad));
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 	
-	//Now encrypt the data.
-	// EVP_EncryptUpdate can be called multiple times if necessary
-	retv    = EVP_EncryptUpdate(ctx, (unsigned char *)encm, (int *)&enclen, (const unsigned char *)msg, sizeof(msg));
+	// Encrypt the data
+	// NOTE: Can be called multiple times if necessary
+	retv = EVP_EncryptUpdate(ctx, (unsigned char *)encm, (int *)&enclen, (const unsigned char *)msg, sizeof(msg));
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 	
-	//Finalize.
-	retv    = EVP_EncryptFinal_ex(ctx, (unsigned char *)encm + enclen, (int *)&enclen2);
-	enclen  += enclen2;
+	// Finalize
+	retv = EVP_EncryptFinal_ex(ctx, (unsigned char *)encm + enclen, (int *)&enclen2);
+	enclen += enclen2;
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
-	
-	//printf("enclen=%d\n", enclen);
 
-
-	//Get authentication tag
-	retv    = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)tag);
+	// Get the authentication tag
+	retv = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)tag);
 
 	if (retv != 1) {
 		printf("Error\n");
@@ -162,8 +159,7 @@ encrypt() {
 	}
 
 __exit:
-
-	/* Clean up */
+	// Destroy the context
 	EVP_CIPHER_CTX_free(ctx);
 	
 	return retv;
@@ -171,68 +167,69 @@ __exit:
 
 static int
 decrypt() {
-	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
+	// Create the context
+	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
 	
-	//Set the cipher and context only.
 	assert(ctx != NULL);
 	assert(cipher != NULL);
 	
-	int retv    = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
+	// Set the cipher and context
+	int retv = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 
-	//Set Nonce size.
-	retv    = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(ivbuf), NULL);
-
-	if (retv != 1) {
-		printf("Error\n");
-		goto __exit;
-	}
-	
-	//Set key and IV (nonce).
-	retv    = EVP_DecryptInit_ex(ctx, NULL, NULL, (const unsigned char*)keybuf, (const unsigned char *)ivbuf);
-
-	if (retv != 1) {
-		printf("Error\n");
-		goto __exit;
-	}
-
-	//Set authentication tag
-	retv    = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, TAG_SIZE, (unsigned char *)tag);
+	// Set the IV (nonce) size
+	retv = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(ivbuf), NULL);
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 	
-	//[Optional for GCM]
-	//Add Additional associated data (AAD).
-	// This can be called zero or more times as required
-	retv    = EVP_DecryptUpdate(ctx, NULL, (int *)&declen, (const unsigned char *)aad, sizeof(aad));
+	// Set the key and IV (nonce)
+	retv = EVP_DecryptInit_ex(ctx, NULL, NULL, (const unsigned char*)keybuf, (const unsigned char *)ivbuf);
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 
-	//Decrypt the data.
-	// EVP_DecryptUpdate can be called multiple times if necessary
-	retv    = EVP_DecryptUpdate(ctx, decm, (int *)&declen, (const unsigned char *)encm, enclen);
+	// Set the authentication tag
+	retv = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, TAG_SIZE, (unsigned char *)tag);
 
 	if (retv != 1) {
 		printf("Error\n");
 		goto __exit;
 	}
 	
-	//Finalize.
-	retv    = EVP_DecryptFinal_ex(ctx, (unsigned char*)decm + declen, (int *)&declen2);
+	// Add AAD
+	// NOTE: Called zero (when there is no AAD) or more times as required
+	retv = EVP_DecryptUpdate(ctx, NULL, (int *)&declen, (const unsigned char *)aad, sizeof(aad));
+
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+
+	// Decrypt the data
+	// NOTE: Can be called multiple times if necessary
+	retv = EVP_DecryptUpdate(ctx, decm, (int *)&declen, (const unsigned char *)encm, enclen);
+
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
+	// Finalize
+	retv = EVP_DecryptFinal_ex(ctx, (unsigned char*)decm + declen, (int *)&declen2);
+	
+	declen += declen2;
 
 __exit:
-
-	/* Clean up */
+	// Destroy the context
 	EVP_CIPHER_CTX_free(ctx);
 	
 	return retv;
