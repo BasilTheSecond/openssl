@@ -48,23 +48,52 @@ main(	int argc,
 	//Set IV length. [Optional for GCM].
 
 	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, strlen((const char *)GCM_IV), NULL);
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 	//Now initialize the context with key and IV. 
 	retv    = EVP_EncryptInit (ctx, NULL, (const unsigned char *)keybuf, (const unsigned char *)GCM_IV);
+	
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 	//Add Additional associated data (AAD). [Optional for GCM]
 	retv    = EVP_EncryptUpdate (ctx, NULL, (int *)&enclen, (const unsigned char *)GCM_ADD, strlen(GCM_ADD));
 
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
 	//Now encrypt the data.
 	retv    = EVP_EncryptUpdate (ctx, (unsigned char *)encm, (int *)&enclen, (const unsigned char *)msg, sizeof(msg));
 
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
 	//Finalize.
 	retv    = EVP_EncryptFinal (ctx, (unsigned char *)encm + enclen, (int *)&enclen2);
 	enclen  += enclen2;
 
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 	//Append authentication tag at the end.
 	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)encm + enclen);
+
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 	//DECRYPTION PART
 	//Now Decryption of the data.
@@ -72,33 +101,63 @@ main(	int argc,
 	//Set just cipher.
 	retv    = EVP_DecryptInit(ctx, cipher, NULL, NULL);
 
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+
 	//Set Nonce size.
 	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_IVLEN, strlen((const char *)GCM_IV), NULL);
+
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 	//Set Tag from the data.
 	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_SET_TAG, TAG_SIZE, (unsigned char *)encm + enclen);
 
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+
 	//Set key and IV (nonce).
 	retv    = EVP_DecryptInit (ctx, NULL, (const unsigned char*)keybuf, (const unsigned char *)GCM_IV);
+
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
 
 	//Add Additional associated data (AAD).
 	retv    = EVP_DecryptUpdate (ctx, NULL, (int *)&declen, (const unsigned char *)GCM_ADD,
 			                         strlen((const char *)GCM_ADD));
 
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+
 	//Decrypt the data.
 	retv    = EVP_DecryptUpdate (ctx, decm, (int *)&declen, (const unsigned char *)encm, enclen);
 
-
+	if (retv != 1) {
+		printf("Error\n");
+		goto __exit;
+	}
+	
 	//Finalize.
 	retv    = EVP_DecryptFinal (ctx, (unsigned char*)decm + declen, (int *)&declen2);
-	
+
 	if (retv == 1) {
 		printf("Success\n");
 	}
 	else {
 		printf("Fail\n");
 	}
-  
+
+__exit:  
   /* Clean up */
 
   /* Removes all digests and ciphers */
