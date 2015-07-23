@@ -41,13 +41,10 @@ main(	int argc,
 	}
 	
 	memset(aad, 0, sizeof(aad));
-	
-	
-
 
 	//Encrypt the data first.
 	//Set the cipher and context only.
-	retv    = EVP_EncryptInit (ctx, cipher, NULL, NULL);
+	retv    = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
 
 	//Set the nonce and tag sizes.
 	//Set IV length. [Optional for GCM].
@@ -60,7 +57,7 @@ main(	int argc,
 	}
 
 	//Now initialize the context with key and IV. 
-	retv    = EVP_EncryptInit (ctx, NULL, (const unsigned char *)keybuf, (const unsigned char *)ivbuf);
+	retv    = EVP_EncryptInit_ex(ctx, NULL, NULL, (const unsigned char *)keybuf, (const unsigned char *)ivbuf);
 	
 	if (retv != 1) {
 		printf("Error\n");
@@ -110,7 +107,7 @@ main(	int argc,
 	//Now Decryption of the data.
 	//Then decrypt the data.
 	//Set just cipher.
-	retv    = EVP_DecryptInit(ctx, cipher, NULL, NULL);
+	retv    = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
 
 	if (retv != 1) {
 		printf("Error\n");
@@ -134,7 +131,7 @@ main(	int argc,
 	}
 
 	//Set key and IV (nonce).
-	retv    = EVP_DecryptInit (ctx, NULL, (const unsigned char*)keybuf, (const unsigned char *)ivbuf);
+	retv    = EVP_DecryptInit_ex(ctx, NULL, NULL, (const unsigned char*)keybuf, (const unsigned char *)ivbuf);
 
 	if (retv != 1) {
 		printf("Error\n");
