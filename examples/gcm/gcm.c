@@ -67,7 +67,8 @@ main(	int argc,
 		goto __exit;
 	}
 
-	//Add Additional associated data (AAD). [Optional for GCM]
+	//[Optional for GCM]
+	//Add Additional associated data (AAD). 
 	// This can be called zero or more times as required
 	retv    = EVP_EncryptUpdate(ctx, NULL, (int *)&enclen, (const unsigned char *)aad, sizeof(aad));
 
@@ -157,6 +158,7 @@ main(	int argc,
 		goto __exit;
 	}
 	
+	//[Optional for GCM]
 	//Add Additional associated data (AAD).
 	// This can be called zero or more times as required
 	retv    = EVP_DecryptUpdate(ctx, NULL, (int *)&declen, (const unsigned char *)aad, sizeof(aad));
