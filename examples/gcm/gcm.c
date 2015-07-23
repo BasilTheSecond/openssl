@@ -8,8 +8,8 @@
 #define TAG_SIZE 16
 #define IV_SIZE 16
 #define KEY_SIZE 32 // 32 bytes for AES-256
-#define MESSAGE_SIZE 1024
-#define AAD_MESSAGE_SIZE 1024 // Additional associated data (must be divisible by 32)
+#define MESSAGE_SIZE 128//1024
+#define AAD_MESSAGE_SIZE 128 //1024 // Additional associated data (must be divisible by 32)
 
 static EVP_CIPHER *cipher = NULL;
 static int enclen, declen, declen2, enclen2;
@@ -23,7 +23,8 @@ static unsigned char tag[TAG_SIZE];
 
 static int encrypt();
 static int decrypt();
-static void dump(	const void *buf, 
+static void dump(	const char *str,
+									const void *buf, 
 									size_t count);
 
 int 
@@ -53,6 +54,8 @@ main(	int argc,
 		goto __exit;
 	}
 	
+	dump("keybuf:---------", keybuf, sizeof(keybuf));
+	
 	// Generate the IV (nonce)
 	retv = RAND_bytes(ivbuf, sizeof(ivbuf));
 	
@@ -60,6 +63,8 @@ main(	int argc,
 		printf("Error\n");
 		goto __exit;
 	}
+	
+	dump("ivbuf:----------", ivbuf, sizeof(ivbuf));
 	
 	// Prepare the additional associated data (AAD)
 	retv = RAND_bytes(aad, sizeof(aad));
@@ -69,6 +74,8 @@ main(	int argc,
 		goto __exit;
 	}
 	
+	dump("aad:------------", aad, sizeof(aad));
+	
 	// Prepare the plaintext
 	retv = RAND_bytes(msg, sizeof(msg));
 	
@@ -76,6 +83,8 @@ main(	int argc,
 		printf("Error\n");
 		goto __exit;
 	}
+	
+	dump("msg:------------", msg, sizeof(msg));
 
 	retv = encrypt();
 	
@@ -84,11 +93,16 @@ main(	int argc,
 		goto __exit;
 	}
 	
+	dump("encm:-----------", encm, sizeof(encm));
+	dump("tag:------------", tag, sizeof(tag));
+	
 	// Check that the authentication works
 	//encm[0] ^= 0xff; // Tamper with the ciphertext
 	//aad[0] ^= 0xff; // Tamper with the additional (plain-text) data
 	
 	retv = decrypt();
+	
+	dump("decm:-----------", decm, sizeof(decm));
 
 	// Check that ciphertext or AAD hasn't been tampered with
 	if (retv == 1 && memcmp(msg, decm, declen) == 0) {
@@ -243,8 +257,12 @@ __exit:
 }
 
 static void 
-dump(	const void *buf, 
+dump(	const char *str,
+			const void *buf, 
 			size_t count) {
+	if (str != NULL) {
+		write(1, str, strlen(str));
+	}
 	write(1, buf, count);
 }
 
