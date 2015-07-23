@@ -169,6 +169,8 @@ main(	int argc,
 
 __exit:  
   /* Clean up */
+  
+  EVP_CIPHER_CTX_free(ctx);
 
   /* Removes all digests and ciphers */
   EVP_cleanup();
