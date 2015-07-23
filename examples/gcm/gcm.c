@@ -4,34 +4,18 @@
 #include <openssl/rand.h>
 #include <string.h>
 
-#define     GCM_IV      "000000000000"
 #define     GCM_ADD     "0000"
 #define     TAG_SIZE    16
-#define     ENC_SIZE    64
 
 int 
 main(	int argc, 
 			char *argv[])
-{ 
-	int rc = 0;
-	
-  /* Load the human readable error strings for libcrypto */
-  ERR_load_crypto_strings();
-
-  /* Load all digest and cipher algorithms */
-  OpenSSL_add_all_algorithms();
-
-  /* Load config file, and other important initialisation */
-  OPENSSL_config(NULL);
-
+{
 	EVP_CIPHER_CTX *ctx     = EVP_CIPHER_CTX_new();
 
 	//Get the cipher.
 	const EVP_CIPHER *cipher  = EVP_aes_128_gcm ();
 
-
-
-	
 	unsigned char keybuf[32]; // 32 bytes for AES-256
 	unsigned char ivbuf[16];
 	int enclen, declen, declen2, enclen2;
@@ -106,6 +90,8 @@ main(	int argc,
 		printf("Error\n");
 		goto __exit;
 	}
+	
+	//encm[0] ^= 0xff; // Corrupt the message to check that authentication works
 
 	//Append authentication tag at the end.
 	retv    = EVP_CIPHER_CTX_ctrl (ctx, EVP_CTRL_GCM_GET_TAG, TAG_SIZE, (unsigned char *)encm + enclen);
@@ -183,13 +169,7 @@ __exit:
   /* Removes all digests and ciphers */
   EVP_cleanup();
 
-  /* if you omit the next, a small leak may be left when you make use of the BIO (low level API) for e.g. base64 transformations */
-  CRYPTO_cleanup_all_ex_data();
-
-  /* Remove error strings */
-  ERR_free_strings();
-
-  return rc;
+  return retv == 1 ? 0 : 1;
 }
 
 
