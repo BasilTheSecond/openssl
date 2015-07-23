@@ -1,6 +1,6 @@
 // Usage:
 // ./gcm -d | hexdump -C
-// ./gcd
+// ./gcm
 
 #include <openssl/conf.h>
 #include <openssl/evp.h>
