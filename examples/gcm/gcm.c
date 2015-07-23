@@ -1,17 +1,22 @@
+// Usage:
+// ./gcm -d | hexdump -C
+// ./gcd
+
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
+#include <stdbool.h>
 
-#define DUMP_ALL // NOTE: use ./gcm | hexdump -C
 #define TAG_SIZE 16
 #define IV_SIZE 16
 #define KEY_SIZE 32 // 32 bytes for AES-256
 #define MESSAGE_SIZE 128
 #define AAD_MESSAGE_SIZE 16 // Additional associated data (AAD)
 
+static bool is_dump = false;
 static EVP_CIPHER *cipher = NULL;
 static int enclen, declen, declen2, enclen2;
 static unsigned char keybuf[KEY_SIZE]; 
@@ -24,19 +29,18 @@ static unsigned char tag[TAG_SIZE];
 
 static int encrypt();
 static int decrypt();
-
-#if defined(DUMP_ALL)
 static void dump(	const char *str,
 									const void *buf, 
 									size_t count);
-#else
-#define dump(...)
-#endif
 
 int 
 main(	int argc, 
 			char *argv[])
 {
+	if (argc == 2 && strcmp(argv[1], "-d") == 0) {
+		is_dump = true;
+	}
+
 	//Select the cipher.
 	//cipher  = EVP_aes_128_gcm ();
 	cipher  = (EVP_CIPHER *)EVP_aes_256_gcm ();
@@ -122,7 +126,8 @@ __exit:
 }
 
 static int
-encrypt() {
+encrypt() 
+{
 	EVP_CIPHER_CTX evp_cipher_ctx;
 	EVP_CIPHER_CTX *ctx = &evp_cipher_ctx;
 	
@@ -193,7 +198,8 @@ __exit:
 }
 
 static int
-decrypt() {
+decrypt() 
+{
 	EVP_CIPHER_CTX evp_cipher_ctx;
 	EVP_CIPHER_CTX *ctx = &evp_cipher_ctx;
 	
@@ -264,15 +270,17 @@ __exit:
 	return retv;
 }
 
-#if defined(DUMP_ALL)
 static void 
 dump(	const char *str,
 			const void *buf, 
-			size_t count) {
+			size_t count) 
+{
+	if (!is_dump) return;
+	
 	if (str != NULL) {
 		write(1, str, strlen(str));
 	}
+
 	write(1, buf, count);
 }
-#endif
 
