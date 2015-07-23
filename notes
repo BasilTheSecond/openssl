@@ -419,6 +419,8 @@ The MAC value protects both a message's data integrity as well as its authentici
 - For the sample code look into: 
 openssl/apps/enc.c
 openssl/crypto/evp/e_aes.c
+http://stackoverflow.com/questions/12153009/openssl-c-example-of-aes-gcm-using-evp-interfaces
+https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c (this is actually in the master of the openssl)
 
 NOTE: in e_aes.c check EVP_CTRL_GCM_SET_IVLEN and EVP_CTRL_GCM_SET_TAG
 
@@ -433,6 +435,40 @@ $ echo "hi1111111111111" | openssl enc -aes-256-cbc -e -K 1001001 -iv 0100110 | 
 00000000  68 69 31 31 31 31 31 31  31 31 31 31 31 31 31 0a  |hi1111111111111.|
 00000010  10 10 10 10 10 10 10 10  10 10 10 10 10 10 10 10  |................|
 00000020
+
+- gcm from the command line tool uses 12 bytes IV so example code has to be changed to use defualt IV length (12 bytes) and 
+plaintext is empty (size 0). On the openssl side, we shouldn't use salt because we provide key and IV:
+
+$ echo -n "Hello, world" | openssl enc -e -K 000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f -iv 000102030405060708090a0b -aes-256-gcm -nosalt | hexdump -C
+00000000  5c 9c fc ca cd 85 78 84  55 65 c0 f5              |\.....x.Ue..|
+0000000c
+
+On the gcm app side we use empty plain text string.
+
+$ ./gcm | hexdump -C
+00000000  5c 9c fc ca cd 85 78 84  55 65 c0 f5              |\.....x.Ue..|
+0000000c
+
+Therefore we get the same ciphertext: 5c 9c fc ca cd 85 78 84  55 65 c0 f5
+
+
+I'm not clear why is the output not padded to the AES-256 block size. Also, openssl doesn't produce tag.
+
+- I tried example from master branch:
+https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c
+
+But it doesn't work on 12.04
+
+- On Ubuntu 14.04:
+
+$ openssl version -a
+OpenSSL 1.0.1f 6 Jan 2014
+built on: Thu Jun 11 15:28:12 UTC 2015
+platform: debian-amd64
+options:  bn(64,64) rc4(16x,int) des(idx,cisc,16,int) blowfish(idx) 
+compiler: cc -fPIC -DOPENSSL_PIC -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -m64 -DL_ENDIAN -DTERMIO -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 -Wl,-Bsymbolic-functions -Wl,-z,relro -Wa,--noexecstack -Wall -DMD32_REG_T=int -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM
+OPENSSLDIR: "/usr/lib/ssl"
+
 
 
 
